@@ -10,50 +10,63 @@ CORS(app)  # Enable CORS for all routes
 
 @app.route('/api/query', methods=['POST'])
 def handle_query():
-    """
-    Receives a user query from the frontend and returns the bot's response.
-    Expected JSON: {"query": "user question"}
-    """
     try:
-        data = request.get_json()
+        # Get user query and optional PDF
+        user_query = request.form.get("query", "").strip()
+        uploaded_file = request.files.get("file")
         
-        if not data or 'query' not in data:
-            return jsonify({'error': 'Missing query field'}), 400
-        
-        user_query = data['query'].strip()
-        
-        if not user_query:
+        print("DEBUG uploaded_file:", uploaded_file)
+
+
+        if not user_query and not uploaded_file:
             return jsonify({'error': 'Query cannot be empty'}), 400
-        
-            # Test queries
 
+        # Default question for PDF-only uploads
+        if not user_query and uploaded_file:
+            user_query = "Summarize this document."
+        # Extract PDF text if present
+        pdf_text = ""
+        if uploaded_file:
+            from read_pdf import extract_text_from_pdf_file
+            pdf_text = extract_text_from_pdf_file(uploaded_file)
 
-        # STEP 1: Let the AI decide the category
+        # Build LLM input
+        llm_input = user_query
+        if pdf_text:
+            llm_input = (
+                "You are given a document below.\n"
+                "Answer the user's question using ONLY this document.\n\n"
+                "DOCUMENT:\n"
+                f"{pdf_text}\n\n"
+                "QUESTION:\n"
+                f"{user_query}"
+            )
+
+        # STEP 1: classify intent (question only)
         detected_cat = classify_intent(user_query)
         print(f"--- Detected Intent: {detected_cat.upper()} ---")
 
-        if detected_cat == "other":
-            # Provide a specialized response for general chat/greetings
-            response = ("Hi! I'm your BC Legal Assistant. I can help you with specific questions "
-                        "about **Rent**, **Work**, or **Immigration** in British Columbia. "
-                        "How can I help you with those today?")
+        if uploaded_file:
+            # PDF present → always use document-aware prompt
+            response = legal_bot_response(llm_input, detected_cat)
+        elif detected_cat == "other":
+            response = (
+                "Hi! I'm your BC Legal Assistant. I can help you with specific questions "
+                "about **Rent**, **Work**, or **Immigration** in British Columbia. "
+                "You can also upload a document for analysis."
+            )
         else:
-
-        # STEP 2: Get the response using the detected category
             response = legal_bot_response(user_query, detected_cat)
+
 
         print(f"\n[{detected_cat.upper()} BOT]:\n{response}")
 
-        # ----------
-        
-        # -----------
-        
         return jsonify({
             'success': True,
             'response': response,
             'category': detected_cat
         }), 200
-    
+
     except Exception as e:
         print(f"Error processing query: {str(e)}")
         print(traceback.format_exc())

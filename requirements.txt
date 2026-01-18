@@ -5,3 +5,5 @@ Flask-CORS
 openai
 tavily-python
 python-dotenv
+openai
+dotenv

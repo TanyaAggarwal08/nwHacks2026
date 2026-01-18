@@ -1,26 +1,25 @@
-# GET THE PDF FROM GOVERNMENT WEBSITE ON TENANCY ACT AND READ THE TEXT FROM IT AND SAVE THE EXTRACTED DATA ON DATABASE TO USE IT LATER
-
+# read_pdf.py
 from pypdf import PdfReader
+import tempfile
+import os
 
-def get_pdf_text(pdf_path: str) -> str:
-    """
-    Extracts all text from a PDF file and returns it as a single string.
-    """
+def extract_text_from_pdf_file(file_storage) -> str:
+    temp_path = None
+    text = ""
+
     try:
-        reader = PdfReader("notice.pdf")
-        full_text = []
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+            temp_path = tmp.name
+            file_storage.save(temp_path)
 
-        # Loop through pages and extract text
+        reader = PdfReader(temp_path)
         for page in reader.pages:
-            text = page.extract_text()
-            if text:
-                full_text.append(text)
+            page_text = page.extract_text()
+            if page_text:
+                text += page_text + "\n"
 
-        # Join all pages with a newline
-        print("\n".join(full_text).strip())
-    
-    except Exception as e:
-        return f"Error reading PDF: {str(e)}"
+    finally:
+        if temp_path and os.path.exists(temp_path):
+            os.remove(temp_path)
 
-
-get_pdf_text("notice.pdf")
+    return text.strip()
