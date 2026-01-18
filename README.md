@@ -1,7 +1,7 @@
 
-# LegalAssist BC — Regulatory Intelligence Portal
+# Cipher BC — Regulatory Intelligence Portal
 
-LegalAssist BC is a web-based AI assistant built for **nwHacks 2026** that helps users query **British Columbia–specific legal and regulatory information**.  
+Ciphert BC is a web-based AI assistant built for **nwHacks 2026** that helps users query **British Columbia–specific legal and regulatory information**.  
 It supports **natural language questions** and **PDF document uploads**, allowing users to ask questions directly about uploaded documents **without storing them**.
 
 The system is designed around **ephemeral processing**: uploaded PDFs are read in memory, converted to text, passed to the LLM for reasoning, and immediately discarded.
