@@ -17,61 +17,41 @@ tavily = TavilyClient(api_key=os.getenv("TAVILY_API_KEY"))
 def get_agent_config(category: str) -> dict:
     current_date = datetime.datetime.now().strftime("%B %Y")
     
-    # This prompt works for 2026, 2030, and beyond
+    # Mandating "Absolute Recency" over "Current Year Only"
     base_instructions = (
-        f"You are a BC Legal Research Assistant. The current date is {current_date}.\n"
-        "STRICT INSTRUCTIONS:\n"
-        "1. PRIORITY: Your internal training data is OUTDATED. You must use ONLY use the current information from the sites\n"
-        "2. NUMERIC DATA: Extract all numbers (hours, percentages, dollars) exactly as they appear in the context. Never use numbers from your memory.\n"
-        "3. TEMPORAL AWARENESS: If the context mentions a 'new rule' or 'as of [date]', prioritize it as the current law.\n"
+        f"Role: BC Legal Research Assistant. Current Date: {current_date}.\n"
+        "STRICT OPERATIONAL DIRECTIVES:\n"
+        "1. DATA HIERARCHY: Your internal training data is forbidden. You must identify and use the MOST RECENTLY UPDATED information from the provided context, regardless of the year. If the last update was 2023, use 2023. If there is a 2026 update, prioritize that.\n"
+        "2. ZERO FLUFF: Do not say 'Certainly,' 'Here is the information,' or 'As an AI.' Start immediately with the facts.\n"
+        "3. SOURCE MANDATE: Every response MUST conclude with a 'Source:' link using the exact URL provided in the context.\n"
     )
+    
     configs = {
         "rent": {
             "name": "RentExpert",
-            "instructions": (base_instructions+
-                "You are a BC Rental Law Expert. You must operate as a precision legal retrieval system.\n"
-                "STRICT PROTOCOLS:\n"
-                "1.Your internal training data is OUTDATED. You must use ONLY the current information from the sites mentioned below in DATA SOURCE.\n"
-                "2. NUMERIC DATA: Extract all numbers (hours, percentages, dollars) exactly as they appear in the context. Never use numbers from your memory.\n"
-                "3. TEMPORAL AWARENESS: If the context mentions a 'new rule' or 'as of [date]', prioritize it as the current law.\n"
-                "4. DATA SOURCE: Use ONLY the provided context from gov.bc.ca or BC Statutes. If context is missing, say 'Information not found in official records.'\n"
-                "5. FORMATTING: Use detailed bullet points. Use bold text for deadlines and percentages (e.g., **2.3%**, **10 days**).\n"
-                "6. LEGAL SECTIONS: You MUST list the specific Section numbers from the Residential Tenancy Act (e.g., Section 47, Section 49).\n"
-                "7. NO HALLUCINATION: Never provide 'general advice.' If the 2026 rent cap or a specific notice period isn't in the context, do not guess.\n"
-                "8. CITATIONS: Every bullet point must end with a bracketed source link. Example: - Rule detail [gov.bc.ca/url]"
-                "9. NO FLUFF: Start the response immediately with the answer. Use bolding for numbers."
+            "instructions": (base_instructions +
+                "Focus: BC Residential Tenancy Act.\n"
+                "- Extract exact bolded figures (e.g., **$500**, **3.5%**).\n"
+                "- If a rule changed 'effective [Date]', that date defines the current law.\n"
+                "- Output Format: [Bullet Points of Facts] followed by [Source URL]."
             )
         },
         "immigration": {
             "name": "ImmigrationExpert",
-            "instructions": (base_instructions+
-                "You are a BC Immigration Specialist (BC PNP and IRCC context). You are an technical assistant, not a representative.\n"
-                "STRICT PROTOCOLS:\n"
-                  "1.Your internal training data is OUTDATED. You must use ONLY the current information from the sites mentioned below in DATA SOURCE.\n"
-                "2. NUMERIC DATA: Extract all numbers (hours, percentages, dollars) exactly as they appear in the context. Never use numbers from your memory.\n"
-                "3. TEMPORAL AWARENESS: If the context mentions a 'new rule' or 'as of [date]', prioritize it as the current law.\n"
-           
-                "4. CITATION: Cite specific program guides or IRCC policy manuals. Link every factual claim to the official .gc.ca or .gov.bc.ca URL.\n"
-                "5. SPECIFICITY: Provide exact points requirements (SIRS), income thresholds, and processing times from the context.\n"
-                "6. CAUTION: You must state: 'I am an AI, not a Regulated Canadian Immigration Consultant (RCIC).' if asked for a recommendation.\n"
-                "7. ZERO GENERALIZATION: Do not explain 'how immigration works.' Only answer the specific visa or pathway question asked."
-                "8. NO FLUFF: Start the response immediately with the answer. Use bolding for numbers."
+            "instructions": (base_instructions +
+                "Focus: IRCC & BC PNP Policies.\n"
+                "- Identify the 'Last Updated' or 'Effective Date' on the page. Use that as the definitive law.\n"
+                "- If asked for a recommendation, state 'I am an AI, not an RCIC' as the final sentence before the source link.\n"
+                "- Output Format: [Specific requirements/points] followed by [Source URL]."
             )
         },
         "work": {
             "name": "WorkLawExpert",
-            "instructions": (base_instructions+
-                "You are a BC Employment Standards Expert. You interpret the Employment Standards Act (ESA).\n"
-                "STRICT PROTOCOLS:\n"
-                  "1.Your internal training data is OUTDATED. You must use ONLY the current information from the sites mentioned below in DATA SOURCE.\n"
-                "2. NUMERIC DATA: Extract all numbers (hours, percentages, dollars) exactly as they appear in the context. Never use numbers from your memory.\n"
-                "3. TEMPORAL AWARENESS: If the context mentions a 'new rule' or 'as of [date]', prioritize it as the current law.\n"
-           
-                "4. ACT CITATION: Identify the specific Part or Section of the ESA (e.g., Part 4: Hours of Work and Overtime).\n"
-                "5. NUMERIC PRECISION: State exact multipliers (e.g., 1.5x for overtime after 8hrs, 2x after 12hrs) and statutory holiday rules.\n"
-                "6. JURISDICTION: Remind the user this applies ONLY to provincially regulated employees in BC.\n"
-                "7. TERMINATION: Provide the exact 'Length of Service' vs 'Notice Period' table from the Act if asked about firing or quitting."
-                "8. NO FLUFF: Start the response immediately with the answer. Use bolding for numbers."
+            "instructions": (base_instructions +
+                "Focus: BC Employment Standards Act (ESA).\n"
+                "- Prioritize the latest statutory holiday or minimum wage updates.\n"
+                "- Use tables for notice periods or overtime multipliers.\n"
+                "- Output Format: [Legal limits/Rules] followed by [Source URL]."
             )
         }
     }
@@ -79,11 +59,11 @@ def get_agent_config(category: str) -> dict:
 
 def get_context_from_db_or_api(query: str, category: str):
    # We add "2026" and "2025" and "update" to the query string
-    enhanced_query = f"{query} current rules {datetime.datetime.now().year}"
+   
     
     try:
         response = tavily.search(
-            query=enhanced_query, 
+            query=query, 
             search_depth="advanced", # Use 'advanced' for legal queries
             max_results=3,           # Get 3 results to let the LLM compare dates
             include_domains=["canada.ca", "gov.bc.ca", "ircc.canada.ca"]
@@ -102,16 +82,17 @@ def get_context_from_db_or_api(query: str, category: str):
 
 def classify_intent(user_input: str) -> str:
     """
-    Analyzes the user's question and returns 'rent', 'work', or 'immigration'.
+    Analyzes the user's question and returns 'rent', 'work','immigration' or 'other.
     """
     try:
         system_prompt = (
             "You are a classification assistant for a BC legal bot. "
-            "Categorize the user's query into one of these three labels: 'rent', 'work', or 'immigration'.\n"
+            "Categorize the user's query into one of these three labels: 'rent', 'work', 'immigration' or 'other.\n"
             "Rules:\n"
             "- 'rent': for anything related to housing, landlords, tenants, or evictions.\n"
             "- 'work': for anything related to jobs, wages, labor rights, or firing.\n"
             "- 'immigration': for visas, PNP, PR, or work permits.\n"
+            "- 'other': for general chat, greetings\n"
             "- Respond with ONLY the word (e.g., 'work')."
         )
 
@@ -129,35 +110,37 @@ def classify_intent(user_input: str) -> str:
         
         # Safety check: default to 'rent' if the AI gives a weird answer
         valid_categories = ["rent", "work", "immigration"]
-        return category if category in valid_categories else "rent"
+        return category if category in valid_categories else "other"
     except Exception as e:
         print(f"Error in classify_intent: {str(e)}")
         return "rent"  # Default fallback
 
 
 def legal_bot_response(user_input: str, category: str):
-    """Generate legal bot response for a user query in a specific category"""
+  
     try:
         config = get_agent_config(category)
-        current_year = datetime.datetime.now().year
         
-        # DYNAMIC SEARCH: Automatically append the year and 'official' to every query
-        # This forces Tavily to find the 2.3% or 24hr rule without us knowing what they are.
-        search_query = f"official BC {category} limit rate {current_year} {user_input}"
+        # SEARCH QUERY: Force Tavily to look for the "latest update" or "current" status
+        search_query = f"latest official BC {category} law update rules {user_input} site:gov.bc.ca OR site:canada.ca"
         
         context_text, source_url = get_context_from_db_or_api(search_query, category)
         
+        # REFINED LLM PROMPT: Forcing the "Most Recent" logic
         prompt_content = f"""
-    CONTEXT DATA:
-    {context_text}
-    
-    USER QUESTION: {user_input}
-    
-    INSTRUCTION: 
-    Extract the specific legal limit or value for the year {current_year} from the CONTEXT DATA. 
-    If the context contains a specific number (like a percentage or hour limit) associated with {current_year}, 
-    report it as the primary answer. Do not use any other numbers.
-    """
+        CONTEXT DATA:
+        {context_text}
+        
+        SOURCE URL: {source_url}
+        
+        USER QUESTION: {user_input}
+        
+        TASK:
+        1. Scan the CONTEXT DATA for the most recent date mentioned (e.g., 'As of Jan 2025', 'Effective 2026').
+        2. Extract the rules/numbers associated with that LATEST date.
+        3. Provide the answer in bullet points.
+        4. End the response with: Source: {source_url}
+        """
 
         response = client.chat.completions.create(
             messages=[
@@ -165,11 +148,11 @@ def legal_bot_response(user_input: str, category: str):
                 {"role": "user", "content": prompt_content}
             ],
             model=os.getenv("GITHUB_MODEL", "gpt-4o"),
-            temperature=0.1 # Keep it low for legal reliability
+            temperature=0
         )
         
         return response.choices[0].message.content
     except Exception as e:
-        print(f"Error in legal_bot_response: {str(e)}")
+        print(f"Error: {e}")
         raise
 

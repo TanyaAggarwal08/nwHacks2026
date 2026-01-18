@@ -32,8 +32,15 @@ def handle_query():
         detected_cat = classify_intent(user_query)
         print(f"--- Detected Intent: {detected_cat.upper()} ---")
 
+        if detected_cat == "other":
+            # Provide a specialized response for general chat/greetings
+            response = ("Hi! I'm your BC Legal Assistant. I can help you with specific questions "
+                        "about **Rent**, **Work**, or **Immigration** in British Columbia. "
+                        "How can I help you with those today?")
+        else:
+
         # STEP 2: Get the response using the detected category
-        response = legal_bot_response(user_query, detected_cat)
+            response = legal_bot_response(user_query, detected_cat)
 
         print(f"\n[{detected_cat.upper()} BOT]:\n{response}")
 
