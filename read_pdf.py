@@ -7,7 +7,7 @@ def get_pdf_text(pdf_path: str) -> str:
     Extracts all text from a PDF file and returns it as a single string.
     """
     try:
-        reader = PdfReader("springschedule.pdf")
+        reader = PdfReader("notice.pdf")
         full_text = []
 
         # Loop through pages and extract text
@@ -17,9 +17,10 @@ def get_pdf_text(pdf_path: str) -> str:
                 full_text.append(text)
 
         # Join all pages with a newline
-        return "\n".join(full_text).strip()
+        print("\n".join(full_text).strip())
     
     except Exception as e:
         return f"Error reading PDF: {str(e)}"
 
-# Example Usage:
+
+get_pdf_text("notice.pdf")

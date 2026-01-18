@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LegalAssist BC | Regulatory Intelligence Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root {
+            --bg-base: #06070a;
+            --bg-surface: #0f1218;
+            --legal-gold: #c5a059;
+            --legal-gold-dim: rgba(197, 160, 89, 0.1);
+            --border: rgba(255, 255, 255, 0.05);
+            --text-main: #f1f1f1;
+            --text-dim: #717b8a;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-base);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* --- New Interactive Background --- */
+        #legal-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -2;
+            background: #06070a;
+        }
+
+        .bg-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(197, 160, 89, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(197, 160, 89, 0.03) 0%, transparent 40%);
+            pointer-events: none;
+        }
+
+        /* --- Global Header --- */
+        nav {
+            position: fixed;
+            top: 0; width: 100%;
+            padding: 20px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            background: rgba(6, 7, 10, 0.8);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(15px);
+        }
+
+        .nav-brand {
+            font-family: 'Crimson Pro', serif;
+            font-weight: 600;
+            font-size: 1.4rem;
+            letter-spacing: 1px;
+            color: var(--legal-gold);
+        }
+
+        .nav-links { display: flex; gap: 30px; }
+        .nav-links a {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: 0.3s;
+        }
+        .nav-links a:hover { color: var(--legal-gold); }
+
+        /* --- Hero Section --- */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .legal-seal {
+            font-family: 'Crimson Pro', serif;
+            color: var(--legal-gold);
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            font-size: 0.75rem;
+            margin-bottom: 20px;
+            background: var(--legal-gold-dim);
+            padding: 5px 15px;
+            border: 1px solid var(--legal-gold-dim);
+            border-radius: 2px;
+        }
+
+        h1 {
+            font-family: 'Crimson Pro', serif;
+            font-size: clamp(3rem, 8vw, 5rem);
+            font-weight: 600;
+            margin-bottom: 20px;
+            line-height: 1.1;
+            text-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .hero-desc {
+            max-width: 600px;
+            color: var(--text-dim);
+            font-size: 1rem;
+            margin-bottom: 40px;
+        }
+
+        /* --- Info Section --- */
+        .landing-info {
+            max-width: 1100px;
+            margin: 0 auto 100px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 0 20px;
+        }
+
+        .info-card {
+            background: rgba(15, 18, 24, 0.6);
+            border: 1px solid var(--border);
+            padding: 40px;
+            transition: 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            backdrop-filter: blur(10px);
+        }
+        .info-card:hover { 
+            border-color: var(--legal-gold); 
+            background: rgba(197, 160, 89, 0.05);
+            transform: translateY(-5px); 
+        }
+        .info-card h3 { font-family: 'Crimson Pro', serif; font-size: 1.4rem; margin-bottom: 15px; color: var(--legal-gold); }
+        .info-card p { font-size: 0.85rem; color: var(--text-dim); }
+
+        /* --- Authority Bar --- */
+        .authority-bar {
+            background: #000;
+            padding: 80px 20px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .stat-grid {
+            display: flex;
+            justify-content: center;
+            gap: 80px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+        .stat-item span { display: block; color: var(--legal-gold); font-family: 'Crimson Pro', serif; font-size: 2.5rem; }
+        .stat-item label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 2px; color: var(--text-dim); }
+
+        /* --- Buttons --- */
+        .btn-group { display: flex; gap: 15px; }
+        .btn {
+            padding: 18px 45px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 0.75rem;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: #fff;
+        }
+        .btn-gold { 
+            background: var(--legal-gold); 
+            color: #000; 
+            border: none;
+            box-shadow: 0 4px 15px rgba(197, 160, 89, 0.2);
+        }
+        .btn-gold:hover { background: #e0bb70; transform: scale(1.02); }
+
+        /* --- Chat Overlay --- */
+        #chatOverlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000;
+            display: none; align-items: center; justify-content: center; padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+        #chatOverlay.active { display: flex; }
+        .chat-modal {
+            width: 100%; max-width: 1000px; height: 85vh; background: var(--bg-surface);
+            border: 1px solid var(--border); display: flex; overflow: hidden;
+            box-shadow: 0 50px 100px rgba(0,0,0,0.5);
+        }
+        .chat-sidebar { width: 260px; border-right: 1px solid var(--border); background: #0a0c10; padding: 30px; display: none; }
+        @media (min-width: 768px) { .chat-sidebar { display: block; } }
+        .chat-main { flex: 1; display: flex; flex-direction: column; }
+        .chat-header { padding: 20px 40px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .chat-body { flex: 1; overflow-y: auto; padding: 40px; display: flex; flex-direction: column; gap: 20px; }
+        .msg-content { padding: 20px; max-width: 85%; font-size: 0.9rem; border: 1px solid var(--border); background: rgba(255,255,255,0.02); }
+        .user { align-self: flex-end; }
+        .user .msg-content { border-color: var(--legal-gold-dim); color: var(--text-main); background: rgba(197, 160, 89, 0.05); }
+        .chat-footer { padding: 30px; border-top: 1px solid var(--border); }
+        .input-wrapper { display: flex; background: #0a0c10; border: 1px solid var(--border); padding: 5px; gap: 10px; }
+        input[type="text"] { flex: 1; background: transparent; border: none; color: #fff; outline: none; padding: 10px; }
+        
+        .loader span { width: 4px; height: 4px; background: var(--legal-gold); border-radius: 50%; display: inline-block; margin: 0 2px; animation: blink 1.4s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <canvas id="legal-canvas"></canvas>
+    <div class="bg-overlay"></div>
+
+    <nav>
+        <div class="nav-brand">LEGALASSIST BC</div>
+        <div class="nav-links">
+            <a href="#statutes">Verification Statutes</a>
+            <a href="#integrity">Protocol</a>
+            <a href="#" onclick="openChat()">System Access</a>
+            <a href="#" style="color: var(--legal-gold)">Privacy Policy</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="legal-seal">Province of British Columbia Regulatory Portal</div>
+        <h1>Automated Legal <br> Compliance</h1>
+        <p class="hero-desc">The official digital interface for cross-referencing provincial statutes with neural legislative updates. Verified by the King's Printer archive.</p>
+        
+        <div class="btn-group">
+            <button class="btn btn-gold" onclick="openChat()">Start Consultation</button>
+        </div>
+    </section>
+
+    <section class="landing-info" id="statutes">
+        <div class="info-card">
+            <h3>Residential Tenancy</h3>
+            <p>Verification of RTB-1 forms and rent increase compliance based on 2026 BC guidelines.</p>
+        </div>
+        <div class="info-card">
+            <h3>Labor Standards</h3>
+            <p>Analysis of employment contracts against the Employment Standards Act for provincial compliance.</p>
+        </div>
+        <div class="info-card">
+            <h3>Neural Archive</h3>
+            <p>Real-time indexing of the King's Printer database for authoritative legal guidance.</p>
+        </div>
+    </section>
+
+    <section class="authority-bar" id="integrity">
+        <div class="stat-grid">
+            <div class="stat-item">
+                <span>2026</span>
+                <label>Archive Year</label>
+            </div>
+            <div class="stat-item">
+                <span>0%</span>
+                <label>Data Retention</label>
+            </div>
+            <div class="stat-item">
+                <span>BC-GOV</span>
+                <label>Sourced from bc.gov websites</label>
+            </div>
+        </div>
+        <p style="max-width: 600px; margin: 0 auto; color: var(--text-dim); font-size: 0.75rem; letter-spacing: 0.5px;">
+            All sessions are processed using an ephemeral memory architecture. Documents are cross-referenced with the <strong>British Columbia Gazette</strong> and purged instantly upon disconnect.
+        </p>
+    </section>
+
+    <div id="chatOverlay">
+        <div class="chat-modal">
+            <div class="chat-sidebar">
+                <h4 style="font-size: 0.6rem; color: var(--legal-gold); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 25px;">Statute Stack</h4>
+                <ul style="list-style: none; font-size: 0.75rem; color: var(--text-dim); display: flex; flex-direction: column; gap: 20px;">
+                    <li>• Tenancy Act [SBC 2002]</li>
+                    <li>• Labor Act [RSBC 1996]</li>
+                    <li>• BC Human Rights Code</li>
+                    <li>• Civil Resolution Stats</li>
+                </ul>
+            </div>
+
+            <div class="chat-main">
+                <div class="chat-header">
+                    <span style="font-family: 'Crimson Pro', serif; font-size: 1rem; color: var(--legal-gold); letter-spacing: 1px;">Portal Session #BC-2026</span>
+                    <button style="background:none; border:none; color:#fff; cursor:pointer; font-size:1.5rem;" onclick="closeChat()">&times;</button>
+                </div>
+
+                <div class="chat-body" id="chatBody">
+                    <div class="msg ai">
+                        <div class="msg-content">
+                            <strong>Neural Archive Initialized.</strong><br>
+                            How can I assist with your BC regulatory inquiry today?
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chat-footer">
+                    <div id="filePreview"></div>
+                    <div class="input-wrapper">
+                        <label for="fileUpload" style="cursor: pointer; padding: 10px; opacity: 0.5;">
+                            📎
+                            <input type="file" id="fileUpload" hidden accept="application/pdf" onchange="handleFileUpload(this)">
+                        </label>
+                        <input type="text" id="userInput" placeholder="Submit inquiry..." onkeypress="if(event.key === 'Enter') sendMessage()">
+                        <button class="btn-gold" style="padding: 5px 20px; font-size: 0.65rem;" onclick="sendMessage()">Process</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Canvas Background Logic ---
+        const canvas = document.getElementById('legal-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let mouse = { x: null, y: null };
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.x;
+            mouse.y = e.y;
+        });
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 1;
+                this.speedX = Math.random() * 0.5 - 0.25;
+                this.speedY = Math.random() * 0.5 - 0.25;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.x < 0) this.x = canvas.width;
+                if (this.y > canvas.height) this.y = 0;
+                if (this.y < 0) this.y = canvas.height;
+            }
+            draw() {
+                ctx.fillStyle = 'rgba(197, 160, 89, 0.3)';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function init() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            for (let i = 0; i < 80; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach((p, index) => {
+                p.update();
+                p.draw();
+                for (let j = index; j < particles.length; j++) {
+                    const dx = p.x - particles[j].x;
+                    const dy = p.y - particles[j].y;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    if (dist < 150) {
+                        ctx.strokeStyle = `rgba(197, 160, 89, ${0.1 * (1 - dist/150)})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.beginPath();
+                        ctx.moveTo(p.x, p.y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+                const dx = p.x - mouse.x;
+                const dy = p.y - mouse.y;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                if (dist < 200) {
+                    ctx.strokeStyle = `rgba(197, 160, 89, 0.4)`;
+                    ctx.beginPath();
+                    ctx.moveTo(p.x, p.y);
+                    ctx.lineTo(mouse.x, mouse.y);
+                    ctx.stroke();
+                }
+            });
+            requestAnimationFrame(animate);
+        }
+
+        init();
+        animate();
+
+        // --- Updated Logic for PDF submission ---
+        const chatOverlay = document.getElementById('chatOverlay');
+        const chatBody = document.getElementById('chatBody');
+        const userInput = document.getElementById('userInput');
+        const filePreview = document.getElementById('filePreview');
+        let attachedFile = null;
+
+        function openChat(mode) {
+            chatOverlay.classList.add('active');
+        }
+
+        function closeChat() { chatOverlay.classList.remove('active'); }
+
+        function handleFileUpload(input) {
+            if (input.files && input.files[0]) {
+                attachedFile = input.files[0];
+                filePreview.innerHTML = `<div style="color: var(--legal-gold); font-size: 0.7rem; margin-bottom: 10px; border: 1px solid var(--legal-gold-dim); padding: 5px 10px; display: inline-block;">
+                    STATUTE_ATTACHED: ${attachedFile.name.toUpperCase()} <span onclick="removeFile()" style="cursor:pointer; margin-left:10px;">&times;</span>
+                </div>`;
+            }
+        }
+
+        function removeFile() {
+            attachedFile = null;
+            filePreview.innerHTML = '';
+            document.getElementById('fileUpload').value = '';
+        }
+
+        function sendMessage() {
+            const text = userInput.value.trim();
+            if (!text && !attachedFile) return;
+
+            addMessage(text || `VERIFICATION: ${attachedFile.name}`, 'user');
+            userInput.value = '';
+            const tempFile = attachedFile;
+            removeFile();
+
+            // Show loading indicator
+            addMessage('<div class="loader"><span></span><span></span><span></span></div>', 'ai');
+            
+            // Send query to backend API
+            const queryData = {
+                query: text
+            };
+
+            fetch('http://localhost:5000/api/query', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(queryData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                const loaders = document.querySelectorAll('.loader');
+                const lastLoader = loaders[loaders.length - 1];
+                
+                if (data.success && lastLoader) {
+                    // This uses the marked library to parse the AI's markdown into real HTML
+                    let responseHTML = `<strong>${data.category.toUpperCase()} BOT:</strong><br>${marked.parse(data.response)}`;
+                    lastLoader.parentElement.innerHTML = responseHTML;
+                } else if (lastLoader) {
+                    lastLoader.parentElement.innerHTML = `<strong>Error:</strong> ${data.error || 'Unknown error occurred'}`;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                const loaders = document.querySelectorAll('.loader');
+                const lastLoader = loaders[loaders.length - 1];
+                if (lastLoader) {
+                    lastLoader.parentElement.innerHTML = `<strong>Connection Error:</strong> Unable to connect to the server. Make sure the backend is running on http://localhost:5000`;
+                }
+            });
+        }
+
+        function addMessage(text, side) {
+            const div = document.createElement('div');
+            div.className = `msg ${side}`;
+            div.innerHTML = `<div class="msg-content">${text}</div>`;
+            chatBody.appendChild(div);
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+    </script>
+</body>
+</html>

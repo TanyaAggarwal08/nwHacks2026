@@ -1,2 +1,7 @@
 requests
 pypdf
+Flask
+Flask-CORS
+openai
+tavily-python
+python-dotenv
