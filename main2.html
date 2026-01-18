@@ -1,511 +1,1590 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LegalAssist BC | Regulatory Intelligence Portal</title>
-    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <style>
-        :root {
-            --bg-base: #06070a;
-            --bg-surface: #0f1218;
-            --legal-gold: #c5a059;
-            --legal-gold-dim: rgba(197, 160, 89, 0.1);
-            --border: rgba(255, 255, 255, 0.05);
-            --text-main: #f1f1f1;
-            --text-dim: #717b8a;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cipher BC</title>
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--bg-base);
-            color: var(--text-main);
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
+  <!-- Fonts (template-like: serif headline + clean sans) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-        /* --- New Interactive Background --- */
-        #legal-canvas {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: -2;
-            background: #06070a;
-        }
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
-        .bg-overlay {
-            position: fixed;
-            inset: 0;
-            z-index: -1;
-            background: 
-                radial-gradient(circle at 20% 30%, rgba(197, 160, 89, 0.05) 0%, transparent 40%),
-                radial-gradient(circle at 80% 70%, rgba(197, 160, 89, 0.03) 0%, transparent 40%);
-            pointer-events: none;
-        }
+  <style>
+    :root{
+      /* Template palette (clean, warm, olive) */
+      --bg: #f5f6f2;
+      --paper: #ffffff;
+      --ink: #0f1b14;
+      --muted: rgba(15,27,20,.62);
+      --faint: rgba(15,27,20,.40);
 
-        /* --- Global Header --- */
-        nav {
-            position: fixed;
-            top: 0; width: 100%;
-            padding: 20px 50px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 100;
-            background: rgba(6, 7, 10, 0.8);
-            border-bottom: 1px solid var(--border);
-            backdrop-filter: blur(15px);
-        }
+      --olive: #2f4f2f;
+      --olive-2: #3f6a3f;
+      --sage: #cfd8c7;
+      --sand: #e6d4b5;
 
-        .nav-brand {
-            font-family: 'Crimson Pro', serif;
-            font-weight: 600;
-            font-size: 1.4rem;
-            letter-spacing: 1px;
-            color: var(--legal-gold);
-        }
+      --line: rgba(15,27,20,.12);
+      --shadow: 0 22px 80px rgba(15,27,20,.10);
+      --shadow2: 0 16px 50px rgba(15,27,20,.08);
 
-        .nav-links { display: flex; gap: 30px; }
-        .nav-links a {
-            color: var(--text-dim);
-            text-decoration: none;
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            transition: 0.3s;
-        }
-        .nav-links a:hover { color: var(--legal-gold); }
+      --r-xl: 28px;
+      --r-lg: 22px;
+      --r-md: 16px;
 
-        /* --- Hero Section --- */
-        .hero {
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 0 20px;
-        }
+      --container: 1140px;
+    }
 
-        .legal-seal {
-            font-family: 'Crimson Pro', serif;
-            color: var(--legal-gold);
-            text-transform: uppercase;
-            letter-spacing: 5px;
-            font-size: 0.75rem;
-            margin-bottom: 20px;
-            background: var(--legal-gold-dim);
-            padding: 5px 15px;
-            border: 1px solid var(--legal-gold-dim);
-            border-radius: 2px;
-        }
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(900px 540px at 70% 10%, rgba(47,79,47,.10), transparent 60%),
+        radial-gradient(900px 650px at 10% 95%, rgba(230,212,181,.35), transparent 55%),
+        linear-gradient(180deg, var(--bg), var(--bg));
+      overflow-x:hidden;
+    }
 
-        h1 {
-            font-family: 'Crimson Pro', serif;
-            font-size: clamp(3rem, 8vw, 5rem);
-            font-weight: 600;
-            margin-bottom: 20px;
-            line-height: 1.1;
-            text-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
+    a{ color:inherit; text-decoration:none; }
+    ::selection{ background: rgba(47,79,47,.18); }
 
-        .hero-desc {
-            max-width: 600px;
-            color: var(--text-dim);
-            font-size: 1rem;
-            margin-bottom: 40px;
-        }
+    .container{
+      width: min(var(--container), calc(100% - 44px));
+      margin-inline:auto;
+    }
 
-        /* --- Info Section --- */
-        .landing-info {
-            max-width: 1100px;
-            margin: 0 auto 100px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            padding: 0 20px;
-        }
+    /* ===== Nav ===== */
+    header{
+      position:sticky;
+      top:0;
+      z-index:100;
+      background: rgba(245,246,242,.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--line);
+    }
 
-        .info-card {
-            background: rgba(15, 18, 24, 0.6);
-            border: 1px solid var(--border);
-            padding: 40px;
-            transition: 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-            backdrop-filter: blur(10px);
-        }
-        .info-card:hover { 
-            border-color: var(--legal-gold); 
-            background: rgba(197, 160, 89, 0.05);
-            transform: translateY(-5px); 
-        }
-        .info-card h3 { font-family: 'Crimson Pro', serif; font-size: 1.4rem; margin-bottom: 15px; color: var(--legal-gold); }
-        .info-card p { font-size: 0.85rem; color: var(--text-dim); }
+    .nav{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 16px;
+      padding: 16px 0;
+    }
 
-        /* --- Authority Bar --- */
-        .authority-bar {
-            background: #000;
-            padding: 80px 20px;
-            border-top: 1px solid var(--border);
-            text-align: center;
-        }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap: 12px;
+      min-width:max-content;
+    }
+    .mark{
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--olive), rgba(47,79,47,.65));
+      box-shadow: 0 16px 45px rgba(47,79,47,.20);
+      position:relative;
+      overflow:hidden;
+    }
+    .mark::after{
+      content:"";
+      position:absolute; inset:-40%;
+      background:
+        radial-gradient(circle at 30% 30%, rgba(255,255,255,.45), transparent 55%),
+        radial-gradient(circle at 70% 70%, rgba(255,255,255,.18), transparent 55%);
+      transform: rotate(18deg);
+      opacity:.65;
+    }
 
-        .stat-grid {
-            display: flex;
-            justify-content: center;
-            gap: 80px;
-            margin-bottom: 40px;
-            flex-wrap: wrap;
-        }
-        .stat-item span { display: block; color: var(--legal-gold); font-family: 'Crimson Pro', serif; font-size: 2.5rem; }
-        .stat-item label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 2px; color: var(--text-dim); }
+    .brand .txt{ display:flex; flex-direction:column; line-height:1.05; }
+    .brand strong{
+      font-family:"Crimson Pro", serif;
+      font-size: 1.18rem;
+      font-weight: 600;
+      letter-spacing: .4px;
+    }
+    .brand span{
+      font-size:.72rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--muted);
+      margin-top:3px;
+    }
 
-        /* --- Buttons --- */
-        .btn-group { display: flex; gap: 15px; }
-        .btn {
-            padding: 18px 45px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-size: 0.75rem;
-            border: 1px solid var(--border);
-            background: transparent;
-            color: #fff;
-        }
-        .btn-gold { 
-            background: var(--legal-gold); 
-            color: #000; 
-            border: none;
-            box-shadow: 0 4px 15px rgba(197, 160, 89, 0.2);
-        }
-        .btn-gold:hover { background: #e0bb70; transform: scale(1.02); }
+    nav.links{
+      display:flex;
+      align-items:center;
+      gap: 18px;
+    }
+    nav.links a{
+      font-size:.78rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: rgba(15,27,20,.68);
+      padding: 10px 10px;
+      border-radius: 999px;
+      transition: background .15s ease, transform .15s ease;
+    }
+    nav.links a:hover{
+      background: rgba(47,79,47,.07);
+      transform: translateY(-1px);
+    }
 
-        /* --- Chat Overlay --- */
-        #chatOverlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000;
-            display: none; align-items: center; justify-content: center; padding: 20px;
-            backdrop-filter: blur(10px);
-        }
-        #chatOverlay.active { display: flex; }
-        .chat-modal {
-            width: 100%; max-width: 1000px; height: 85vh; background: var(--bg-surface);
-            border: 1px solid var(--border); display: flex; overflow: hidden;
-            box-shadow: 0 50px 100px rgba(0,0,0,0.5);
-        }
-        .chat-sidebar { width: 260px; border-right: 1px solid var(--border); background: #0a0c10; padding: 30px; display: none; }
-        @media (min-width: 768px) { .chat-sidebar { display: block; } }
-        .chat-main { flex: 1; display: flex; flex-direction: column; }
-        .chat-header { padding: 20px 40px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-        .chat-body { flex: 1; overflow-y: auto; padding: 40px; display: flex; flex-direction: column; gap: 20px; }
-        .msg-content { padding: 20px; max-width: 85%; font-size: 0.9rem; border: 1px solid var(--border); background: rgba(255,255,255,0.02); }
-        .user { align-self: flex-end; }
-        .user .msg-content { border-color: var(--legal-gold-dim); color: var(--text-main); background: rgba(197, 160, 89, 0.05); }
-        .chat-footer { padding: 30px; border-top: 1px solid var(--border); }
-        .input-wrapper { display: flex; background: #0a0c10; border: 1px solid var(--border); padding: 5px; gap: 10px; }
-        input[type="text"] { flex: 1; background: transparent; border: none; color: #fff; outline: none; padding: 10px; }
-        a {color: #cee754}
-        /* --- Base message bubble styling --- */
-.msg-content { 
-    padding: 16px 20px; 
-    max-width: 85%; 
-    font-size: 0.9rem; 
-    border: 1px solid var(--border); 
-    background: rgba(255, 255, 255, 0.02);
-    /* Large uniform rounding for all corners by default */
-    border-radius: 18px; 
-    line-height: 1.5;
+    .actions{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      min-width:max-content;
+    }
+
+    .btn{
+      appearance:none;
+      border:none;
+      cursor:pointer;
+      border-radius: 999px;
+      padding: 12px 16px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-size: .76rem;
+      color: var(--ink);
+      background: rgba(47,79,47,.08);
+      border: 1px solid rgba(47,79,47,.18);
+      transition: transform .16s ease, box-shadow .18s ease, background .18s ease;
+    }
+    .btn:hover{ transform: translateY(-2px); box-shadow: var(--shadow2); background: rgba(47,79,47,.10); }
+    .btn:active{ transform: translateY(0); }
+    .btn:focus-visible{ outline:none; box-shadow: 0 0 0 4px rgba(47,79,47,.18); }
+
+    .btn-primary{
+      color: #ffffff;
+      background: linear-gradient(135deg, var(--olive), var(--olive-2));
+      border-color: rgba(47,79,47,.24);
+      box-shadow: 0 18px 60px rgba(47,79,47,.18);
+    }
+    .btn-primary:hover{ box-shadow: 0 26px 80px rgba(47,79,47,.22); }
+
+    .hamburger{
+      display:none;
+      width: 44px; height: 44px;
+      border-radius: 16px;
+      background: rgba(47,79,47,.08);
+      border: 1px solid rgba(47,79,47,.18);
+      cursor:pointer;
+      align-items:center;
+      justify-content:center;
+      transition: transform .16s ease;
+    }
+    .hamburger:hover{ transform: translateY(-2px); }
+    .mobile{
+      display:none;
+      padding: 0 0 14px;
+    }
+    .mobile .panel{
+      border-radius: var(--r-xl);
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.78);
+      box-shadow: var(--shadow2);
+      padding: 10px;
+      display:flex;
+      flex-direction:column;
+      gap: 8px;
+    }
+    .mobile a{
+      padding: 12px 12px;
+      border-radius: 16px;
+      background: rgba(47,79,47,.06);
+      border: 1px solid rgba(47,79,47,.12);
+      font-size: .82rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: rgba(15,27,20,.86);
+    }
+
+    @media (max-width: 920px){
+      nav.links{ display:none; }
+      .actions .btn{ display:none; }
+      .hamburger{ display:flex; }
+      .mobile{ display:block; }
+      .mobile[hidden]{ display:none; }
+    }
+
+    /* ===== Sections ===== */
+    main{ position:relative; z-index:1; }
+    section{ padding: 56px 0; }
+
+    .hero{
+      padding: 56px 0 24px;
+    }
+
+    .hero-grid{
+      display:grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 18px;
+      align-items:stretch;
+    }
+    @media (max-width: 980px){
+      .hero-grid{ grid-template-columns: 1fr; }
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(47,79,47,.18);
+      background: rgba(47,79,47,.06);
+      color: rgba(15,27,20,.78);
+      font-size: .78rem;
+      letter-spacing: 1.6px;
+      text-transform: uppercase;
+      width:max-content;
+    }
+    .eyebrow .dot{
+      width: 8px; height: 8px; border-radius: 999px;
+      background: var(--olive);
+      box-shadow: 0 0 0 6px rgba(47,79,47,.12);
+    }
+
+    h1{
+      margin: 16px 0 12px;
+      font-family:"Crimson Pro", serif;
+      font-weight: 600;
+      line-height: 1.0;
+      letter-spacing: .2px;
+      font-size: clamp(3.1rem, 6.6vw, 5.1rem);
+    }
+
+    .lede{
+      margin: 0 0 18px;
+      color: var(--muted);
+      font-size: 1.06rem;
+      line-height: 1.75;
+      max-width: 70ch;
+    }
+
+    .hero-actions{
+      display:flex;
+      gap: 12px;
+      flex-wrap:wrap;
+      align-items:center;
+      margin-top: 18px;
+    }
+
+    /* Right hero “device” block (template-like) */
+    .hero-media{
+      border-radius: var(--r-xl);
+      border: 1px solid var(--line);
+      background: var(--paper);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      position:relative;
+      padding: 14px;
+    }
+
+    .device{
+      border-radius: 22px;
+      border: 1px solid rgba(15,27,20,.14);
+      overflow:hidden;
+      background: linear-gradient(180deg, rgba(47,79,47,.18), rgba(47,79,47,.06));
+      position:relative;
+      min-height: 380px;
+      box-shadow: 0 18px 55px rgba(15,27,20,.10);
+    }
+    .device .topbar{
+      height: 44px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding: 0 14px;
+      background: rgba(255,255,255,.70);
+      border-bottom: 1px solid rgba(15,27,20,.10);
+    }
+    .dots{ display:flex; gap: 7px; }
+    .dots i{
+      width: 10px; height: 10px; border-radius: 999px;
+      background: rgba(15,27,20,.18);
+    }
+    .device .topbar .tag{
+      font-size:.72rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(47,79,47,.08);
+      border: 1px solid rgba(47,79,47,.16);
+      color: rgba(15,27,20,.78);
+    }
+    .device .canvas{
+      height: calc(100% - 44px);
+      display:grid;
+      place-items:center;
+      padding: 18px;
+      position:relative;
+      overflow:hidden;
+    }
+    .device .mock{
+      width: min(560px, 100%);
+      border-radius: 18px;
+      border: 1px solid rgba(15,27,20,.12);
+      background:
+        radial-gradient(600px 300px at 35% 35%, rgba(47,79,47,.28), transparent 58%),
+        radial-gradient(520px 320px at 75% 70%, rgba(230,212,181,.55), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.65), rgba(255,255,255,.85));
+      box-shadow: 0 20px 70px rgba(15,27,20,.12);
+      padding: 16px;
+    }
+    .mock .row1{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+    }
+    .chip{
+      font-size:.70rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.70);
+      border: 1px solid rgba(15,27,20,.12);
+      color: rgba(15,27,20,.78);
+      white-space:nowrap;
+    }
+    .mock .chart{
+      margin-top: 12px;
+      height: 150px;
+      border-radius: 14px;
+      border: 1px solid rgba(15,27,20,.10);
+      background:
+        linear-gradient(90deg, rgba(15,27,20,.06), rgba(15,27,20,.02)),
+        repeating-linear-gradient(90deg, transparent 0 22px, rgba(15,27,20,.05) 22px 23px),
+        linear-gradient(180deg, rgba(47,79,47,.20), transparent 65%);
+      position:relative;
+      overflow:hidden;
+    }
+    .mock .chart::after{
+      content:"";
+      position:absolute; left:0; bottom:-30px; width:100%; height: 120px;
+      background: radial-gradient(closest-side at 50% 0%, rgba(47,79,47,.35), transparent 70%);
+      opacity:.55;
+    }
+    .mock .kpis{
+      margin-top: 12px;
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .kpi{
+      border-radius: 14px;
+      border: 1px solid rgba(15,27,20,.10);
+      background: rgba(255,255,255,.72);
+      padding: 10px;
+    }
+    .kpi strong{
+      font-family:"Crimson Pro", serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+    .kpi span{
+      display:block;
+      margin-top: 4px;
+      font-size: .72rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    @media (max-width: 520px){
+      .mock .kpis{ grid-template-columns: 1fr; }
+      .device{ min-height: 340px; }
+    }
+
+    /* ===== “We've cracked the code.” feature grid ===== */
+    .section-head{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .section-head h2{
+      margin:0;
+      font-family:"Crimson Pro", serif;
+      font-weight: 600;
+      font-size: 2.2rem;
+      letter-spacing: .2px;
+    }
+    .section-head p{
+      margin:0;
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 70ch;
+    }
+    @media (max-width: 780px){
+      .section-head{ flex-direction:column; align-items:flex-start; }
+    }
+
+    .cards{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+    @media (max-width: 980px){
+      .cards{ grid-template-columns: 1fr; }
+    }
+
+    .card{
+      border-radius: var(--r-xl);
+      border: 1px solid var(--line);
+      background: var(--paper);
+      box-shadow: var(--shadow2);
+      padding: 18px;
+      position:relative;
+      overflow:hidden;
+      min-height: 148px;
+    }
+    .card::before{
+      content:"";
+      position:absolute; inset:-60%;
+      background:
+        radial-gradient(circle at 25% 25%, rgba(47,79,47,.12), transparent 50%),
+        radial-gradient(circle at 75% 75%, rgba(230,212,181,.35), transparent 55%);
+      transform: rotate(10deg);
+      opacity:.9;
+      pointer-events:none;
+    }
+    .card .inner{ position:relative; display:flex; flex-direction:column; gap: 10px; height:100%; }
+    .card .top{ display:flex; align-items:center; gap: 10px; }
+    .icon{
+      width: 42px; height: 42px;
+      border-radius: 16px;
+      background: rgba(47,79,47,.08);
+      border: 1px solid rgba(47,79,47,.14);
+      display:grid; place-items:center;
+      flex:none;
+    }
+    .card h3{
+      margin:0;
+      font-size: 1.06rem;
+      font-weight: 750;
+      letter-spacing: .2px;
+    }
+    .card p{
+      margin:0;
+      color: var(--muted);
+      line-height: 1.65;
+      font-size: .98rem;
+    }
+    .card .meta{
+      margin-top:auto;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      padding-top: 6px;
+    }
+    .pill{
+      font-size:.72rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(47,79,47,.18);
+      background: rgba(47,79,47,.06);
+      color: rgba(15,27,20,.80);
+      width:max-content;
+      white-space:nowrap;
+    }
+    .card small{ color: var(--faint); }
+
+    /* ===== Big Picture split ===== */
+    .split{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      align-items:stretch;
+    }
+    @media (max-width: 980px){
+      .split{ grid-template-columns: 1fr; }
+    }
+
+    .panel{
+      border-radius: var(--r-xl);
+      border: 1px solid var(--line);
+      background: var(--paper);
+      box-shadow: var(--shadow2);
+      padding: 18px;
+    }
+
+    .media{
+      border-radius: 22px;
+      border: 1px solid rgba(15,27,20,.12);
+      background:
+        radial-gradient(700px 420px at 35% 35%, rgba(47,79,47,.26), transparent 60%),
+        radial-gradient(650px 480px at 70% 75%, rgba(230,212,181,.55), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.75), rgba(255,255,255,.92));
+      min-height: 320px;
+      overflow:hidden;
+      position:relative;
+    }
+    .media .label{
+      position:absolute;
+      top: 14px; left: 14px;
+      background: rgba(255,255,255,.78);
+      border: 1px solid rgba(15,27,20,.12);
+      border-radius: 999px;
+      padding: 8px 10px;
+      font-size:.72rem;
+      letter-spacing:2px;
+      text-transform: uppercase;
+      color: rgba(15,27,20,.78);
+    }
+
+    .checklist{
+      margin: 10px 0 0;
+      padding: 0;
+      list-style:none;
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+      color: rgba(15,27,20,.78);
+      line-height: 1.55;
+    }
+    .checklist li{
+      display:flex;
+      gap: 10px;
+      align-items:flex-start;
+      padding: 12px 12px;
+      border-radius: 18px;
+      border: 1px solid rgba(15,27,20,.10);
+      background: rgba(47,79,47,.04);
+    }
+    .checklist svg{ flex:none; margin-top: 2px; color: var(--olive); }
+
+    /* ===== Comparison table ===== */
+    .tableWrap{
+      border-radius: var(--r-xl);
+      border: 1px solid var(--line);
+      background: var(--paper);
+      box-shadow: var(--shadow2);
+      overflow:hidden;
+    }
+    table{
+      width:100%;
+      border-collapse: collapse;
+      font-size: .98rem;
+    }
+    thead th{
+      text-align:left;
+      padding: 14px 14px;
+      font-size:.72rem;
+      letter-spacing:2px;
+      text-transform: uppercase;
+      color: rgba(15,27,20,.72);
+      background: rgba(47,79,47,.06);
+      border-bottom: 1px solid rgba(15,27,20,.10);
+    }
+    tbody td{
+      padding: 14px 14px;
+      border-bottom: 1px solid rgba(15,27,20,.08);
+      color: rgba(15,27,20,.78);
+      vertical-align: top;
+    }
+    tbody tr:last-child td{ border-bottom:none; }
+    .yes{ color: var(--olive); font-weight: 700; }
+    .no{ color: rgba(15,27,20,.45); font-weight: 700; }
+
+    /* ===== Testimonial ===== */
+    .quote{
+      display:flex;
+      flex-direction:column;
+      gap: 12px;
+    }
+    .quote blockquote{
+      margin:0;
+      padding: 0;
+      font-family:"Crimson Pro", serif;
+      font-size: 1.45rem;
+      line-height: 1.25;
+    }
+    .quote .by{
+      color: var(--muted);
+      font-size: .98rem;
+      line-height: 1.6;
+    }
+    .avatar{
+      border-radius: 22px;
+      border: 1px solid rgba(15,27,20,.12);
+      background:
+        radial-gradient(500px 340px at 50% 40%, rgba(230,212,181,.70), transparent 65%),
+        radial-gradient(520px 360px at 30% 75%, rgba(47,79,47,.14), transparent 65%),
+        linear-gradient(180deg, rgba(255,255,255,.78), rgba(255,255,255,.92));
+      min-height: 280px;
+    }
+
+    /* ===== Steps ===== */
+    .steps{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 14px;
+    }
+    @media (max-width: 980px){ .steps{ grid-template-columns: 1fr; } }
+
+    .step{
+      border-radius: var(--r-xl);
+      border: 1px solid var(--line);
+      background: var(--paper);
+      box-shadow: var(--shadow2);
+      padding: 18px;
+      position:relative;
+      overflow:hidden;
+    }
+    .step .n{
+      font-family:"Crimson Pro", serif;
+      font-size: 2.2rem;
+      font-weight: 600;
+      color: rgba(47,79,47,.88);
+      line-height: 1;
+    }
+    .step h4{
+      margin: 8px 0 6px;
+      font-size: 1.06rem;
+      font-weight: 800;
+    }
+    .step p{
+      margin:0;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    /* ===== CTA ===== */
+    .cta{
+      border-radius: var(--r-xl);
+      border: 1px solid rgba(47,79,47,.16);
+      background:
+        radial-gradient(800px 500px at 20% 30%, rgba(47,79,47,.12), transparent 60%),
+        radial-gradient(900px 620px at 85% 70%, rgba(230,212,181,.55), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,255,255,.95));
+      box-shadow: var(--shadow);
+      padding: 22px;
+      text-align:center;
+    }
+    .cta h3{
+      margin:0 0 10px;
+      font-family:"Crimson Pro", serif;
+      font-weight: 600;
+      font-size: 2.0rem;
+    }
+    .cta p{
+      margin: 0 auto 16px;
+      color: var(--muted);
+      max-width: 70ch;
+      line-height: 1.7;
+    }
+    .cta .actions{
+      justify-content:center;
+    }
+
+    /* ===== Footer ===== */
+    footer{
+      padding: 28px 0 40px;
+      border-top: 1px solid var(--line);
+      background: rgba(255,255,255,.35);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .foot{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 16px;
+      flex-wrap:wrap;
+      color: rgba(15,27,20,.58);
+      font-size: .92rem;
+    }
+    .foot a{ color: rgba(47,79,47,.92); text-decoration:none; }
+    .foot a:hover{ text-decoration:underline; }
+
+    /* ===== Chat Overlay (kept, but restyled to match template) ===== */
+    #chatOverlay{
+      position:fixed; inset:0;
+      z-index: 2500;
+      display:none;
+      place-items:center;
+      padding: 18px;
+      background: rgba(15,27,20,.55);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    #chatOverlay.active{ display:grid; }
+
+    .chat{
+      width: min(1120px, 100%);
+      height: min(86vh, 880px);
+      border-radius: calc(var(--r-xl) + 4px);
+      border: 1px solid rgba(255,255,255,.20);
+      background: rgba(255,255,255,.92);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      display:grid;
+      grid-template-columns: 320px 1fr;
+    }
+    @media (max-width: 900px){
+      .chat{ grid-template-columns: 1fr; height: 90vh; }
+      .aside{ display:none; }
+    }
+
+    .aside{
+      background: rgba(47,79,47,.06);
+      border-right: 1px solid rgba(15,27,20,.10);
+      padding: 18px;
+      display:flex;
+      flex-direction:column;
+      gap: 12px;
+    }
+    .aside .title{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+    }
+    .aside h4{
+      margin:0;
+      font-size:.74rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(47,79,47,.90);
+    }
+    .aside .tag{
+      font-size:.72rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(47,79,47,.18);
+      background: rgba(255,255,255,.70);
+      color: rgba(15,27,20,.74);
+      width:max-content;
+    }
+    .aside ul{
+      margin:0; padding:0;
+      list-style:none;
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+      color: rgba(15,27,20,.76);
+      line-height: 1.45;
+      font-size: .95rem;
+    }
+    .aside li{
+      padding: 12px 12px;
+      border-radius: 18px;
+      border: 1px solid rgba(15,27,20,.10);
+      background: rgba(255,255,255,.72);
+    }
+    .aside .hint{
+      margin-top:auto;
+      color: rgba(15,27,20,.62);
+      font-size:.90rem;
+      line-height: 1.6;
+      border-top: 1px solid rgba(15,27,20,.10);
+      padding-top: 12px;
+    }
+
+    .chatMain{ display:flex; flex-direction:column; min-width:0; height:100%; }
+
+    .chatHeader{
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(15,27,20,.10);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      background: rgba(47,79,47,.04);
+    }
+    .chatHeader .left{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      min-width:0;
+    }
+    .chatHeader strong{
+      font-family:"Crimson Pro", serif;
+      font-weight: 600;
+      letter-spacing:.4px;
+      color: rgba(15,27,20,.90);
+      font-size: 1.08rem;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .chatHeader span{
+      font-size:.78rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(15,27,20,.58);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .iconBtn{
+      width: 46px; height: 46px;
+      border-radius: 16px;
+      border: 1px solid rgba(15,27,20,.12);
+      background: rgba(255,255,255,.75);
+      cursor:pointer;
+      display:grid; place-items:center;
+      transition: transform .16s ease;
+      color: rgba(15,27,20,.88);
+    }
+    .iconBtn:hover{ transform: translateY(-2px); }
+
+    .chatBody{
+      flex:1;
+      overflow:auto;
+      padding: 16px;
+      display:flex;
+      flex-direction:column;
+      gap: 12px;
+      scroll-behavior:smooth;
+      background: rgba(255,255,255,.82);
+    }
+    .chatBody::-webkit-scrollbar{ width: 12px; }
+    .chatBody::-webkit-scrollbar-thumb{
+      background: rgba(15,27,20,.14);
+      border: 3px solid rgba(0,0,0,0);
+      background-clip: padding-box;
+      border-radius: 999px;
+    }
+
+    .msg{ display:flex; gap: 10px; align-items:flex-end; }
+    .msg.ai{ justify-content:flex-start; }
+    .msg.user{ justify-content:flex-end; }
+
+    .bubble{
+      max-width: min(760px, 92%);
+      padding: 14px 14px;
+      border-radius: 18px;
+      border: 1px solid rgba(15,27,20,.10);
+      background: rgba(47,79,47,.05);
+      box-shadow: 0 18px 55px rgba(15,27,20,.08);
+      line-height: 1.55;
+      font-size: .98rem;
+      overflow:hidden;
+      position:relative;
+      color: rgba(15,27,20,.88);
+    }
+    .msg.user .bubble{
+      background: rgba(47,79,47,.12);
+      border-color: rgba(47,79,47,.18);
+      border-bottom-right-radius: 7px;
+    }
+    .msg.ai .bubble{
+      background: rgba(255,255,255,.78);
+      border-bottom-left-radius: 7px;
+    }
+
+    .bubble :is(p, ul, ol){ margin: 0 0 10px; }
+    .bubble :is(ul, ol){ padding-left: 18px; }
+    .bubble p:last-child{ margin-bottom:0; }
+    .bubble a{
+      color: rgba(47,79,47,.95);
+      text-decoration:none;
+      border-bottom: 1px dotted rgba(47,79,47,.45);
+    }
+    .bubble code{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: .90em;
+      padding: .18em .38em;
+      border-radius: 10px;
+      background: rgba(15,27,20,.06);
+      border: 1px solid rgba(15,27,20,.10);
+    }
+    .bubble pre{
+      margin: 10px 0 0;
+      padding: 12px;
+      border-radius: 16px;
+      background: rgba(15,27,20,.06);
+      border: 1px solid rgba(15,27,20,.10);
+      overflow:auto;
+    }
+    .bubble pre code{ background: transparent; border:none; padding:0; font-size: .88em; }
+
+    .chatFooter{
+      padding: 12px;
+      border-top: 1px solid rgba(15,27,20,.10);
+      background: rgba(47,79,47,.04);
+    }
+
+    .composer{
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+    }
+
+    .filePill{
+      display:inline-flex;
+      align-items:center;
+      gap: 10px;
+      width:max-content;
+      padding: 9px 12px;
+      border-radius: 999px;
+      background: rgba(47,79,47,.10);
+      border: 1px solid rgba(47,79,47,.18);
+      color: rgba(15,27,20,.85);
+    }
+    .filePill small{
+      color: rgba(15,27,20,.60);
+      font-size: .76rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    .filePill button{
+      appearance:none;
+      border:none;
+      background: rgba(255,255,255,.75);
+      border: 1px solid rgba(15,27,20,.10);
+      color: rgba(15,27,20,.85);
+      width:28px; height:28px;
+      border-radius: 999px;
+      cursor:pointer;
+      display:grid; place-items:center;
+      transition: transform .16s ease;
+    }
+    .filePill button:hover{ transform: translateY(-2px); }
+
+    .row{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+      padding: 10px;
+      border-radius: 20px;
+      border: 1px solid rgba(15,27,20,.10);
+      background: rgba(255,255,255,.85);
+      box-shadow: 0 22px 70px rgba(15,27,20,.08);
+    }
+
+    .attach{
+      width: 46px; height: 46px;
+      border-radius: 16px;
+      display:grid; place-items:center;
+      background: rgba(47,79,47,.08);
+      border: 1px solid rgba(47,79,47,.16);
+      cursor:pointer;
+      transition: transform .16s ease;
+      color: rgba(15,27,20,.90);
+      flex:none;
+    }
+    .attach:hover{ transform: translateY(-2px); }
+
+    input[type="text"]{
+      flex:1;
+      min-width:0;
+      background: transparent;
+      border:none;
+      outline:none;
+      color: rgba(15,27,20,.92);
+      font-size: 1rem;
+      padding: 10px 6px;
+    }
+    input[type="text"]::placeholder{ color: rgba(15,27,20,.45); }
+
+    .send{
+      min-width: 128px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap: 10px;
+    }
+    .kbd{
+      font-size:.72rem;
+      color: rgba(255,255,255,.90);
+      background: rgba(15,27,20,.72);
+      border: 1px solid rgba(15,27,20,.12);
+      padding: 3px 8px;
+      border-radius: 999px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .loader{
+      display:inline-flex;
+      gap:6px;
+      align-items:center;
+    }
+    .loader span{
+      width:6px; height:6px;
+      border-radius:999px;
+      background: rgba(47,79,47,.90);
+      opacity:.2;
+      animation: pulse 1.05s infinite ease-in-out;
+    }
+    .loader span:nth-child(2){ animation-delay: .12s; }
+    .loader span:nth-child(3){ animation-delay: .24s; }
+    @keyframes pulse{
+      0%,100%{ opacity:.2; transform: translateY(0); }
+      50%{ opacity:1; transform: translateY(-2px); }
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      *{ scroll-behavior:auto !important; }
+      .loader span{ animation:none !important; opacity:.85; }
+    }
+ .chatMain { 
+  display: flex; 
+  flex-direction: column; 
+  height: 100%; /* Must fill the parent .chat height */
+  min-width: 0;
+  overflow: hidden; /* Prevent outer scroll */
 }
 
-/* --- User-specific bubble (Right-aligned) --- */
-.user .msg-content { 
-    border-color: var(--legal-gold-dim); 
-    color: var(--text-main); 
-    background: rgba(197, 160, 89, 0.05);
-    /* Keeps the bottom-right corner sharp while rounding others */
-    border-bottom-right-radius: 4px; 
+.chatBody {
+  flex: 1; /* Grows to take up all space between header and footer */
+  overflow-y: auto; /* Force vertical scrollbar when content exceeds height */
+  overflow-x: hidden; /* Prevent horizontal scroll */
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  scroll-behavior: smooth;
+  background: rgba(255,255,255,.82);
+  min-height: 0; /* Critical for flex child scrolling */
 }
-
-/* --- AI-specific bubble (Left-aligned) --- */
-.ai .msg-content {
-    /* Keeps the bottom-left corner sharp while rounding others */
-    border-bottom-left-radius: 4px;
-}
-        .loader span { width: 4px; height: 4px; background: var(--legal-gold); border-radius: 50%; display: inline-block; margin: 0 2px; animation: blink 1.4s infinite; }
-        @keyframes blink { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
-    </style>
+  </style>
 </head>
+
 <body>
+  <header>
+    <div class="container">
+      <div class="nav">
+        <a class="brand" href="#top" aria-label="LegalAssist BC Home">
+          <div class="mark" aria-hidden="true"></div>
+          <div class="txt">
+            <strong>Cipher BC</strong>
+            <!-- <span>Regulatory Intelligence</span> -->
+          </div>
+        </a>
 
-    <canvas id="legal-canvas"></canvas>
-    <div class="bg-overlay"></div>
+        <nav class="links" aria-label="Primary">
+          <a href="#capabilities">Capabilities</a>
+          <a href="#bigpicture">Big Picture</a>
+          <a href="#compare">Why Choose</a>
+          <a href="#connect" onclick="openChat(); return false;">Portal</a>
+        </nav>
 
-    <nav>
-        <div class="nav-brand">LEGALASSIST BC</div>
-        <div class="nav-links">
-            <a href="#statutes">Verification Statutes</a>
-            <a href="#integrity">Protocol</a>
-            <a href="#" onclick="openChat()">System Access</a>
-            <a href="#" style="color: var(--legal-gold)">Privacy Policy</a>
+        <div class="actions">
+          <button class="btn btn-primary" onclick="openChat()">Start Consultation</button>
+          <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </button>
         </div>
-    </nav>
+      </div>
 
-    <section class="hero">
-        <div class="legal-seal">Province of British Columbia Regulatory Portal</div>
-        <h1>Automated Legal <br> Compliance</h1>
-        <p class="hero-desc">The official digital interface for cross-referencing provincial statutes with neural legislative updates. Verified by the King's Printer archive.</p>
-        
-        <div class="btn-group">
-            <button class="btn btn-gold" onclick="openChat()">Start Consultation</button>
+      <div class="mobile" id="mobileMenu" hidden>
+        <div class="panel">
+          <a href="#capabilities" onclick="toggleMenu(false)">Capabilities</a>
+          <a href="#bigpicture" onclick="toggleMenu(false)">Big Picture</a>
+          <a href="#compare" onclick="toggleMenu(false)">Why Choose</a>
+          <a href="#connect" onclick="toggleMenu(false); openChat(); return false;">Portal</a>
         </div>
-    </section>
-
-    <section class="landing-info" id="statutes">
-        <div class="info-card">
-            <h3>Residential Tenancy</h3>
-            <p>Verification of RTB-1 forms and rent increase compliance based on 2026 BC guidelines.</p>
-        </div>
-        <div class="info-card">
-            <h3>Labor Standards</h3>
-            <p>Analysis of employment contracts against the Employment Standards Act for provincial compliance.</p>
-        </div>
-        <div class="info-card">
-            <h3>Neural Archive</h3>
-            <p>Real-time indexing of the King's Printer database for authoritative legal guidance.</p>
-        </div>
-    </section>
-
-    <section class="authority-bar" id="integrity">
-        <div class="stat-grid">
-            <div class="stat-item">
-                <span>2026</span>
-                <label>Archive Year</label>
-            </div>
-            <div class="stat-item">
-                <span>0%</span>
-                <label>Data Retention</label>
-            </div>
-            <div class="stat-item">
-                <span>BC-GOV</span>
-                <label>Sourced from bc.gov websites</label>
-            </div>
-        </div>
-        <p style="max-width: 600px; margin: 0 auto; color: var(--text-dim); font-size: 0.75rem; letter-spacing: 0.5px;">
-            All sessions are processed using an ephemeral memory architecture. Documents are cross-referenced with the <strong>British Columbia Gazette</strong> and purged instantly upon disconnect.
-        </p>
-    </section>
-
-    <div id="chatOverlay">
-        <div class="chat-modal">
-            <div class="chat-sidebar">
-                <h4 style="font-size: 0.6rem; color: var(--legal-gold); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 25px;">Statute Stack</h4>
-                <ul style="list-style: none; font-size: 0.75rem; color: var(--text-dim); display: flex; flex-direction: column; gap: 20px;">
-                    <li>• Tenancy Act [SBC 2002]</li>
-                    <li>• Labor Act [RSBC 1996]</li>
-                    <li>• BC Human Rights Code</li>
-                    <li>• Civil Resolution Stats</li>
-                </ul>
-            </div>
-
-            <div class="chat-main">
-                <div class="chat-header">
-                    <span style="font-family: 'Crimson Pro', serif; font-size: 1rem; color: var(--legal-gold); letter-spacing: 1px;">Portal Session #BC-2026</span>
-                    <button style="background:none; border:none; color:#fff; cursor:pointer; font-size:1.5rem;" onclick="closeChat()">&times;</button>
-                </div>
-
-                <div class="chat-body" id="chatBody">
-                    <div class="msg ai">
-                        <div class="msg-content">
-                            <strong>Neural Archive Initialized.</strong><br>
-                            How can I assist with your BC regulatory inquiry today?
-                        </div>
-                    </div>
-                </div>
-
-                <div class="chat-footer">
-                    <div id="filePreview"></div>
-                    <div class="input-wrapper">
-                        <label for="fileUpload" style="cursor: pointer; padding: 10px; opacity: 0.5;">
-                            📎
-                            <input type="file" id="fileUpload" hidden accept="application/pdf" onchange="handleFileUpload(this)">
-                        </label>
-                        <input type="text" id="userInput" placeholder="Submit inquiry..." onkeypress="if(event.key === 'Enter') sendMessage()">
-                        <button class="btn-gold" style="padding: 5px 20px; font-size: 0.65rem;" onclick="sendMessage()">Process</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
+  </header>
 
-    <script>
-        // --- Canvas Background Logic ---
-        const canvas = document.getElementById('legal-canvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
-        let mouse = { x: null, y: null };
+  <main id="top">
+    <!-- HERO (template-like) -->
+    <section class="hero">
+      <div class="container">
+        <div class="hero-grid">
+          <div>
+            <div class="eyebrow">
+              <span class="dot" aria-hidden="true"></span>
+              Province of British Columbia
+            </div>
 
-        window.addEventListener('resize', () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        });
+            <h1>Legal Logic. Simplified</h1>
 
-        window.addEventListener('mousemove', (e) => {
-            mouse.x = e.x;
-            mouse.y = e.y;
-        });
+            <p class="lede">
+              Instant cross-referencing for BC statutes and legislative updates. Upload any legal notice or contract to receive structured analysis with verified citations.
+            </p>
 
-        class Particle {
-            constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 2 + 1;
-                this.speedX = Math.random() * 0.5 - 0.25;
-                this.speedY = Math.random() * 0.5 - 0.25;
-            }
-            update() {
-                this.x += this.speedX;
-                this.y += this.speedY;
-                if (this.x > canvas.width) this.x = 0;
-                if (this.x < 0) this.x = canvas.width;
-                if (this.y > canvas.height) this.y = 0;
-                if (this.y < 0) this.y = canvas.height;
-            }
-            draw() {
-                ctx.fillStyle = 'rgba(197, 160, 89, 0.3)';
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-            }
+            <div class="hero-actions">
+              <button class="btn btn-primary" onclick="openChat()">Open Portal</button>
+              <a class="btn" href="#capabilities">Explore</a>
+            </div>
+
+            <p class="lede" style="margin-top:14px; font-size:.98rem;">
+              Session-first design. Uploads are processed for analysis and not retained by the UI layer.
+            </p>
+          </div>
+
+          <aside class="hero-media" aria-label="Portal preview">
+            <div class="device">
+              <div class="topbar">
+                <div class="dots" aria-hidden="true"><i></i><i></i><i></i></div>
+                <div class="tag">BC-GOV MODE</div>
+              </div>
+              <div class="canvas">
+                <div class="mock" aria-hidden="true">
+                  <div class="row1">
+                    <div class="chip">Statute Cross-Ref</div>
+                    <div class="chip">PDF → Checks</div>
+                    <div class="chip">Cite-ready</div>
+                  </div>
+                  <div class="chart"></div>
+                  <div class="kpis">
+                    <div class="kpi"><strong>0</strong><span>Retention</span></div>
+                    <div class="kpi"><strong>BC</strong><span>Scope</span></div>
+                    <div class="kpi"><strong>Fast</strong><span>Output</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- If you want a real hero image like the template:
+                 Replace .mock with an <img> and set object-fit: cover; -->
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- “We've cracked the code.” -->
+    <section id="capabilities">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <h2>We’ve cracked the code.</h2>
+     
+          </div>
+        </div>
+
+        <div class="cards">
+          <article class="card">
+            <div class="inner">
+              <div class="top">
+                <div class="icon" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path d="M4 20V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M8 5V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M4 20h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                </div>
+                <h3>Residential Tenancy Agreements</h3>
+              </div>
+              <p>Got frustrated from your landlord? Get a structured analysis of your tenancy rights and obligations with verified citations.</p>
+              <div class="meta">
+                <small>rent • payments</small>
+                <div class="pill">HOUSING</div>
+              </div>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="inner">
+              <div class="top">
+                <div class="icon" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path d="M8 7V5a4 4 0 0 1 8 0v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M6 7h12l-1 14H7L6 7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M9 11v6M15 11v6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                </div>
+                <h3>Employment Standards Check</h3>
+              </div>
+              <p>Want to know your employment rights? Get the latest information here backed by official sources</p>
+              <div class="meta">
+                <small>Pay • hours • termination</small>
+                <div class="pill">WORK</div>
+              </div>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="inner">
+              <div class="top">
+                <div class="icon" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path d="M4 19V5a2 2 0 0 1 2-2h9l5 5v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M14 3v6h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                </div>
+                <h3>Immigration Queries</h3>
+              </div>
+              <p>Ask any query regarding your immigration status and it will be answered with official Government links.</p>
+              <div class="meta">
+                <small>legality of Residential status</small>
+                <div class="pill">IMMIGRATION</div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- Why Choose (comparison table like template) -->
+    <section id="compare">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <h2>Why Choose Cipher BC?</h2>
+
+          </div>
+        </div>
+
+        <div class="tableWrap">
+          <table aria-label="Comparison table">
+            <thead>
+              <tr>
+                <th>Feature</th>
+                <th>Cipher BC</th>
+                <th>Manual Review</th>
+                <th>Generic Chat</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Statute anchors (sections)</td>
+                <td class="yes">Yes</td>
+                <td class="yes">Yes</td>
+                <td class="no">Often no</td>
+              </tr>
+              <tr>
+                <td>PDF/notice reasoning</td>
+                <td class="yes">Yes</td>
+                <td class="yes">Yes</td>
+                <td class="no">Unreliable</td>
+              </tr>
+              <tr>
+                <td>Structured review friendly output </td>
+                <td class="yes">Yes</td>
+                <td class="no">Varies</td>
+                <td class="no">Varies</td>
+              </tr>
+              <tr>
+                <td>Session-first (UI-layer no retention)</td>
+                <td class="yes">Yes</td>
+                <td class="no">N/A</td>
+                <td class="no">Unknown</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Testimonial-like section -->
+    <section id="testimonial">
+      <div class="container", >
+        <div class="split">
+          <!-- <div class="panel avatar" aria-label="Portrait placeholder" ></div> -->
+          <div class="panel quote" >
+            <blockquote >
+              “Finally, a tool that doesn't just 'chat'—it actually reads the fine print of BC legal notices and provides the exact Government links with the required information.”
+            </blockquote>
+
+            <div style="display:flex; gap:10px; flex-wrap:wrap;margin-top:4px">
+              <button class="btn btn-primary" onclick="openChat()">Open Portal</button>
+              <a class="btn" href="#connect">Connect</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Steps like template “Map Your Success” -->
+    <section id="steps">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <h2>Map Your Success</h2>
+            <p>Three steps, minimal, editorial, and responsive.</p>
+          </div>
+        </div>
+
+        <div class="steps">
+          <div class="step">
+            <div class="n">01</div>
+            <h4>Analyze</h4>
+            <p>Attach a PDF (notice, contract, letter, filing) to understand its legality.</p>
+          </div>
+          <div class="step">
+            <div class="n">02</div>
+            <h4>Ask</h4>
+            <p>Ask any number of questions about the immigration, work and rental data. </p>
+          </div>
+          <div class="step">
+            <div class="n">03</div>
+            <h4>Extract</h4>
+            <p>Maps every answer directly to official BC Laws with live source links.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section id="connect">
+      <div class="container">
+        <div class="cta">
+          <h3>Connect with us</h3>
+          <p>
+            Ready to validate a notice or extract compliance risks from a document?
+            Open the portal and submit your inquiry.
+          </p>
+          <div class="actions" style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="openChat()">Start Consultation</button>
+            <a class="btn" href="#top">Back to top</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="container">
+        <div class="foot">
+          <div>©️ <span id="year"></span> Cipher BC</div>
+          <div style="display:flex; gap:14px; flex-wrap:wrap;">
+            <a href="#capabilities">Capabilities</a>
+          
+            <a href="#compare">Why Choose</a>
+            <a href="#" onclick="openChat(); return false;">Portal</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <!-- Chat Overlay (kept; backend unchanged) -->
+  <div id="chatOverlay" role="dialog" aria-modal="true" aria-label="LegalAssist BC Portal">
+    <div class="chat" id="chatModal">
+      <aside class="aside" aria-label="Statute stack">
+        <div class="title">
+          <h4>Statute Stack</h4>
+          <div class="tag">BC-2026</div>
+        </div>
+        <ul>
+          <li>Residential Tenancy Act (SBC 2002)</li>
+          <li>Employment Standards Act (RSBC)</li>
+          <li>BC Human Rights Code</li>
+          <li>Civil Resolution Tribunal</li>
+        </ul>
+        <div class="hint">
+          Tip: attach a PDF, then ask “validate timelines + flag compliance risks”.
+        </div>
+      </aside>
+
+      <section class="chatMain">
+        <div class="chatHeader">
+          <div class="left">
+            <strong>Portal Session</strong>
+            <span id="sessionLabel">Session #BC-2026</span>
+          </div>
+          <button class="iconBtn" onclick="closeChat()" aria-label="Close portal">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="chatBody" id="chatBody" aria-live="polite">
+          <div class="msg ai">
+            <div class="bubble">
+              <strong>Session initialized.</strong><br/>
+              How can I help with your BC regulatory inquiry today?
+            </div>
+          </div>
+        </div>
+
+        <div class="chatFooter">
+          <div class="composer">
+            <div id="filePreview"></div>
+
+            <div class="row">
+              <label class="attach" for="fileUpload" title="Attach PDF">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M21 12.5l-8.5 8.5a6 6 0 0 1-8.5-8.5L12 4.5a4 4 0 1 1 5.7 5.6L9.7 18.1a2 2 0 1 1-2.8-2.8l8.3-8.3"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="sr-only"></span>
+              </label>
+              <input type="file" id="fileUpload" hidden accept="application/pdf" onchange="handleFileUpload(this)"/>
+
+              <input
+                type="text"
+                id="userInput"
+                placeholder="Submit inquiry…"
+                autocomplete="off"
+                onkeydown="handleComposerKey(event)"
+              />
+
+              <button class="btn btn-primary send" onclick="sendMessage()">
+                <span>Process</span>
+                <span class="kbd">Enter</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    // year
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    // mobile menu
+    const hamburger = document.getElementById("hamburger");
+    const mobileMenu = document.getElementById("mobileMenu");
+    function toggleMenu(forceOpen){
+      const open = typeof forceOpen === "boolean" ? forceOpen : mobileMenu.hasAttribute("hidden");
+      if (open) mobileMenu.removeAttribute("hidden");
+      else mobileMenu.setAttribute("hidden", "");
+      hamburger?.setAttribute("aria-expanded", String(open));
+    }
+    hamburger?.addEventListener("click", () => toggleMenu());
+
+    // chat overlay logic (backend unchanged)
+    const chatOverlay = document.getElementById("chatOverlay");
+    const chatModal = document.getElementById("chatModal");
+    const chatBody = document.getElementById("chatBody");
+    const userInput = document.getElementById("userInput");
+    const filePreview = document.getElementById("filePreview");
+    const fileUpload = document.getElementById("fileUpload");
+    let attachedFile = null;
+
+    function openChat(){
+      chatOverlay.classList.add("active");
+      toggleMenu(false);
+      setTimeout(() => userInput?.focus(), 0);
+    }
+
+    function closeChat(){
+      chatOverlay.classList.remove("active");
+    }
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && chatOverlay.classList.contains("active")) closeChat();
+    });
+    chatOverlay.addEventListener("click", (e) => {
+      if (e.target === chatOverlay) closeChat();
+    });
+
+    function handleComposerKey(e){
+      if (e.key === "Enter" && !e.shiftKey){
+        e.preventDefault();
+        sendMessage();
+      }
+    }
+
+    function escapeHtml(str){
+      return String(str)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    function handleFileUpload(input){
+      if (input.files && input.files[0]){
+        attachedFile = input.files[0];
+        filePreview.innerHTML = `
+          <div class="filePill">
+            <small>Attached</small>
+            <span>${escapeHtml(attachedFile.name)}</span>
+            <button type="button" aria-label="Remove file" onclick="removeFile()">×</button>
+          </div>
+        `;
+      }
+    }
+
+    function removeFile(){
+      attachedFile = null;
+      filePreview.innerHTML = "";
+      if (fileUpload) fileUpload.value = "";
+    }
+
+    function addMessage(html, side){
+      const wrap = document.createElement("div");
+      wrap.className = `msg ${side}`;
+      const bubble = document.createElement("div");
+      bubble.className = "bubble";
+      bubble.innerHTML = html;
+      wrap.appendChild(bubble);
+      chatBody.appendChild(wrap);
+      chatBody.scrollTop = chatBody.scrollHeight;
+      return bubble;
+    }
+
+    function sendMessage(){
+      const text = (userInput?.value || "").trim();
+      if (!text && !attachedFile) return;
+
+      const displayText = text ? escapeHtml(text) : `<em>Uploaded:</em> <strong>${escapeHtml(attachedFile.name)}</strong>`;
+      addMessage(displayText, "user");
+
+      userInput.value = "";
+      const tempFile = attachedFile;
+
+      const loaderBubble = addMessage(`<div class="loader" aria-label="Loading"><span></span><span></span><span></span></div>`, "ai");
+
+      const formData = new FormData();
+      if (text) formData.append("query", text);
+      if (tempFile) formData.append("file", tempFile);
+      removeFile();
+
+      fetch("http://localhost:5000/api/query", {
+        method: "POST",
+        body: formData
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (!loaderBubble) return;
+        if (data && data.success){
+          const label = data.category ? String(data.category).toUpperCase() : "RESPONSE";
+          const parsed = marked.parse(String(data.response || ""));
+          loaderBubble.innerHTML = `<strong>${escapeHtml(label)}:</strong><br/>${parsed}`;
+        } else {
+          loaderBubble.innerHTML = `<strong>Error:</strong> ${escapeHtml(data?.error || "Unknown error occurred")}`;
         }
-
-        function init() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            for (let i = 0; i < 80; i++) {
-                particles.push(new Particle());
-            }
+      })
+      .catch(err => {
+        console.error(err);
+        if (loaderBubble){
+          loaderBubble.innerHTML =
+            `<strong>Connection Error:</strong> Unable to connect to the server. Make sure the backend is running on <code>http://localhost:5000</code>.`;
         }
+      });
+    }
 
-        function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach((p, index) => {
-                p.update();
-                p.draw();
-                for (let j = index; j < particles.length; j++) {
-                    const dx = p.x - particles[j].x;
-                    const dy = p.y - particles[j].y;
-                    const dist = Math.sqrt(dx*dx + dy*dy);
-                    if (dist < 150) {
-                        ctx.strokeStyle = `rgba(197, 160, 89, ${0.1 * (1 - dist/150)})`;
-                        ctx.lineWidth = 0.5;
-                        ctx.beginPath();
-                        ctx.moveTo(p.x, p.y);
-                        ctx.lineTo(particles[j].x, particles[j].y);
-                        ctx.stroke();
-                    }
-                }
-                const dx = p.x - mouse.x;
-                const dy = p.y - mouse.y;
-                const dist = Math.sqrt(dx*dx + dy*dy);
-                if (dist < 200) {
-                    ctx.strokeStyle = `rgba(197, 160, 89, 0.4)`;
-                    ctx.beginPath();
-                    ctx.moveTo(p.x, p.y);
-                    ctx.lineTo(mouse.x, mouse.y);
-                    ctx.stroke();
-                }
-            });
-            requestAnimationFrame(animate);
-        }
+    // expose for inline handlers
+    window.openChat = openChat;
+    window.closeChat = closeChat;
+    window.handleFileUpload = handleFileUpload;
+    window.removeFile = removeFile;
+    window.sendMessage = sendMessage;
+    window.handleComposerKey = handleComposerKey;
+    window.toggleMenu = toggleMenu;
+   function openChat() {
+  chatOverlay.classList.add("active");
+  document.body.style.overflow = "hidden"; // Lock the background
+  setTimeout(() => userInput?.focus(), 0);
+}
 
-        init();
-        animate();
-
-        // --- Updated Logic for PDF submission ---
-        const chatOverlay = document.getElementById('chatOverlay');
-        const chatBody = document.getElementById('chatBody');
-        const userInput = document.getElementById('userInput');
-        const filePreview = document.getElementById('filePreview');
-        let attachedFile = null;
-
-        function openChat(mode) {
-            chatOverlay.classList.add('active');
-        }
-
-        function closeChat() { chatOverlay.classList.remove('active'); }
-
-        function handleFileUpload(input) {
-            if (input.files && input.files[0]) {
-                attachedFile = input.files[0];
-                filePreview.innerHTML = `<div style="color: var(--legal-gold); font-size: 0.7rem; margin-bottom: 10px; border: 1px solid var(--legal-gold-dim); padding: 5px 10px; display: inline-block;">
-                    STATUTE_ATTACHED: ${attachedFile.name.toUpperCase()} <span onclick="removeFile()" style="cursor:pointer; margin-left:10px;">&times;</span>
-                </div>`;
-            }
-        }
-
-        function removeFile() {
-            attachedFile = null;
-            filePreview.innerHTML = '';
-            document.getElementById('fileUpload').value = '';
-        }
-
-        function sendMessage() {
-            const text = userInput.value.trim();
-            if (!text && !attachedFile) return;
-
-            addMessage(text || `VERIFICATION: ${attachedFile.name}`, 'user');
-            userInput.value = '';
-            const tempFile = attachedFile;
-            
-
-            // Show loading indicator
-            addMessage('<div class="loader"><span></span><span></span><span></span></div>', 'ai');
-            
-            // Send query to backend API
-            // Send query + optional PDF to backend
-        const formData = new FormData();
-        if (text) formData.append("query", text);
-        if (tempFile) formData.append("file", tempFile);
-        removeFile();
-
-        fetch('http://localhost:5000/api/query', {
-            method: 'POST',
-            body: formData
-        })
-
-            .then(response => response.json())
-            .then(data => {
-                const loaders = document.querySelectorAll('.loader');
-                const lastLoader = loaders[loaders.length - 1];
-                
-                if (data.success && lastLoader) {
-                    // This uses the marked library to parse the AI's markdown into real HTML
-                    let responseHTML = `<strong>${data.category.toUpperCase()} BOT:</strong><br>${marked.parse(data.response)}`;
-                    lastLoader.parentElement.innerHTML = responseHTML;
-                } else if (lastLoader) {
-                    lastLoader.parentElement.innerHTML = `<strong>Error:</strong> ${data.error || 'Unknown error occurred'}`;
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                const loaders = document.querySelectorAll('.loader');
-                const lastLoader = loaders[loaders.length - 1];
-                if (lastLoader) {
-                    lastLoader.parentElement.innerHTML = `<strong>Connection Error:</strong> Unable to connect to the server. Make sure the backend is running on http://localhost:5000`;
-                }
-            });
-        }
-
-        function addMessage(text, side) {
-            const div = document.createElement('div');
-            div.className = `msg ${side}`;
-            div.innerHTML = `<div class="msg-content">${text}</div>`;
-            chatBody.appendChild(div);
-            chatBody.scrollTop = chatBody.scrollHeight;
-        }
-    </script>
+function closeChat() {
+  chatOverlay.classList.remove("active");
+  document.body.style.overflow = "auto"; // Unlock the background
+}
+  </script>
 </body>
 </html>
