@@ -77,7 +77,15 @@ git clone https://github.com/TanyaAggarwal08/nwHacks2026.git
 cd nwHacks2026
 ````
 
-### 2. (Recommended) Create a virtual environment
+### 2. Clone the repository
+```bash
+Create a .env file
+paste this
+GITHUB_TOKEN=<Your-Github-Token-That-Can-Run-Models>
+TAVILY_API_KEY=<Create-An-Account-With-Tavily-To-Get-Free-Key>
+````
+
+### 3. (Recommended) Create a virtual environment
 
 ```bash
 python -m venv venv
@@ -85,7 +93,7 @@ source venv/bin/activate   # macOS / Linux
 # venv\Scripts\activate    # Windows
 ```
 
-### 3. Install dependencies
+### 4. Install dependencies
 
 ```bash
 pip install -r requirements.txt
